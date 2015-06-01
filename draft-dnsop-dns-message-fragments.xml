@@ -1,0 +1,250 @@
+<?xml version="1.0"?>
+<!-- This template is for creating an Internet Draft using xml2rfc,
+     which is available here: http://xml.resource.org. -->
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
+<!-- One method to get references from the online citation libraries.
+     There has to be one entity for each item to be referenced.
+     An alternate method (rfc include) is described in the references. -->
+
+<!ENTITY RFC1034 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1034.xml">
+<!ENTITY RFC1035 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1035.xml">
+<!ENTITY RFC5681 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5681.xml">
+<!ENTITY RFC6891 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.6891.xml">
+]>
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<!-- used by XSLT processors -->
+<!-- For a complete list and description of processing instructions (PIs),
+     please see http://xml.resource.org/authoring/README.html. -->
+<!-- Below are generally applicable Processing Instructions (PIs) that most I-Ds might want to use.
+     (Here they are set differently than their defaults in xml2rfc v1.32) -->
+<?rfc strict="yes" ?>
+<!-- give errors regarding ID-nits and DTD validation -->
+<!-- control the table of contents (ToC) -->
+<?rfc toc="yes"?>
+<?rfc tocappendix="yes"?>
+<!-- generate a ToC -->
+<?rfc tocdepth="3"?>
+<!-- the number of levels of subsections in ToC. default: 3 -->
+<!-- control references -->
+<?rfc symrefs="yes"?>
+<!-- use symbolic references tags, i.e, [RFC2119] instead of [1] -->
+<?rfc sortrefs="yes" ?>
+<!-- sort the reference entries alphabetically -->
+<!-- control vertical white space
+     (using these PIs as follows is recommended by the RFC Editor) -->
+<?rfc compact="yes" ?>
+<!-- do not start each main section on a new page -->
+<?rfc subcompact="no" ?>
+<!-- keep one blank line between list items -->
+<!-- end of list of popular I-D processing instructions -->
+<?rfc comments="no" ?>
+<?rfc inline="yes" ?>
+<rfc category="exp" docName="draft-dnsop-dns-message-fragments-00" ipr="trust200902">
+
+  <front>
+
+    <title>DNS message fragments</title>
+
+    <author fullname="Mukund Sivaraman" initials="M." surname="Sivaraman">
+      <organization>Internet Systems Consortium</organization>
+      <address>
+        <postal>
+          <street>950 Charter Street</street>
+          <city>Redwood City</city>
+          <code>94063</code>
+          <region>CA</region>
+          <country>USA</country>
+        </postal>
+        <email>muks@isc.org</email>
+        <uri>http://www.isc.org/</uri>
+      </address>
+    </author>
+
+    <date/>
+
+    <!-- Meta-data Declarations -->
+
+    <area>Internet Area</area>
+    <workgroup>Internet Engineering Task Force</workgroup>
+
+    <!-- <keyword>dns</keyword> -->
+
+    <abstract>
+      <t>This document describes a method to transmit DNS messages over
+      multiple UDP datagrams by fragmenting them at the application layer.</t>
+    </abstract>
+
+  </front>
+
+  <middle>
+
+    <section title="Introduction">
+      <section title="Background">
+	<t><xref target="RFC1035" /> describes how DNS messages are to
+	be transmitted over UDP. A DNS query message is transmitted
+	using one UDP datagram from client to server, and a
+	corresponding DNS reply message is transmitted using one UDP
+	datagram from server to client.</t>
+
+	<t><xref target="RFC1035" /> limited DNS message UDP datagram
+	lengths to a maximum of 512 bytes.</t>
+
+	<t>The upper limit on the size of a DNS message that can be
+	transmitted thus depends on the maximum size of the UDP datagram
+	that can be transmitted successfully from the sender to the
+	receiver.</t>
+
+	<t>As a UDP datagram is transmitted in a single IP PDU, the size
+	of a UDP datagram (including various lower internet layer
+	headers) can be as large as 64 KiB. But practically, the maximum
+	size is often limited by various factors in the sender's
+	environment.</t>
+      </section>
+      <section title="Goals">
+      </section>
+    </section>
+
+    <section title="DNS Message Fragmentation Method">
+      <t>
+	<list style="symbols">
+	  <t>The FRAGMENT option MUST NOT be present in DNS query
+	  messages, i.e., when QR=0. If a DNS implementation notices the
+	  FRAGMENT option in a DNS query message, it MUST ignore it.</t>
+
+	  <t>In DNS reply messages, the FRAGMENT option MUST NOT be
+	  present in datagrams when truncation is not done, i.e., when
+	  TC=0. If a DNS implementation notices the FRAGMENT option in a
+	  DNS reply message fragment datagram that is not truncated,
+	  i.e, when TC=0, it MUST drop all DNS reply message fragment
+	  datagrams received for that message's corresponding question
+	  tuple (server IP, port, message ID) without using any data
+	  from them.</t>
+
+	  <t>More than one FRAGMENT option MUST NOT be present in a DNS
+	  reply message fragment datagram. If a DNS implementation
+	  notices multiple FRAGMENT options in a DNS reply message
+	  fragment datagram, it MUST drop all reply datagrams received
+	  for that message's corresponding question tuple (server IP,
+	  port, message ID) without using any data from them.</t>
+	</list>
+      </t>
+
+      <t>TBD: Should we support fragmentation in query messages? This
+      could complicate fire-and-forget style authoritative servers into
+      maintaining state and could become a handy tool for attacking
+      authoritative servers with floods, similar in nature to TCP SYN
+      floods.</t>
+    </section>
+
+    <section title="The FRAGMENT EDNS(0) Option">
+
+      <t>FRAGMENT is an EDNS(0) <xref target="RFC6891" /> option that
+      assists a client in gathering the various fragments of a DNS
+      message from multiple UDP datagrams. It is described in the
+      previous section. Here, its syntax is provided.</t>
+
+      <section title="Wire Format">
+	<t>TBD.</t>
+      </section>
+
+      <section title="Option Fields">
+	<section title="Fragment Identifier">
+	  <t>The Fragment Identifier field is represented as an unsigned
+	  8-bit integer. The first fragment is identified as 1. Values
+	  in the range [1,255] can be used to identify the various
+	  fragments. Value 0 is used for signalling purposes.</t>
+	</section>
+	<section title="Fragment Count">
+	  <t>The Fragment Count field is represented as an unsigned
+	  8-bit integer. It contains the number of fragments in the
+	  range [1,255] that make up the DNS message. Value 0 is used
+	  for signalling purposes.</t>
+	</section>
+      </section>
+      <section title="Presentation Format">
+	<t>As with other EDNS(0) options, the FRAGMENT option does not
+	have a presentation format.</t>
+      </section>
+    </section>
+
+    <section title="Network Considerations">
+      <section title="Background">
+	<t>TCP-based application protocols co-exist well with competing
+	traffic flows in the internet due to congestion control methods
+	such as in <xref target="RFC5681" /> that are present in TCP
+	implementations.</t>
+
+	<t>UDP-based application protocols have no restrictions in lower
+	layers to stop them from flooding datagrams into a network and
+	causing congestion. So applications that use UDP have to check
+	themselves from causing congestion so that their traffic is not
+	disruptive.</t>
+
+	<t>In the case of <xref target="RFC1035" />, only one reply UDP
+	datagram was sent per request UDP datagram, and so the lock-step
+	flow control automatically ensured that UDP DNS traffic didn't
+	lead to congestion. When DNS clients didn't hear back from the
+	server, and had to retransmit the question, they typically paced
+	themselves by using methods such as a retransmission timer based
+	on a smoothed round-trip time between client and server.</t>
+
+	<t>Due to the message fragmentation described in this document,
+	when a DNS query causes multiple DNS reply datagrams to be sent
+	back to the client, there is a risk that without effective
+	control of flow, DNS traffic could cause problems to competing
+	flows along the network path.</t>
+
+	<t>Because UDP does not guarantee delivery of datagrams, there
+	is a possibility that one or more fragments of a DNS message
+	will be lost during transfer. This is especially a problem on
+	some wireless networks where a rate of datagrams can continually
+	be lost due to interference and other environmental
+	factors. With larger numbers of message fragments, the
+	probability of fragment loss increases.</t>
+      </section>
+
+      <section title="Implementation Requirements">
+	<t>TBD.</t>
+      </section>
+
+    </section>
+
+    <section title="Security Considerations">
+      <t>TBD.</t>
+    </section>
+
+    <section title="IANA Considerations">
+      <t>The FRAGMENT EDNS(0) option requires an option code to be
+      assigned for it.</t>
+    </section>
+
+    <section title="Acknowledgements">
+      <t>Thanks to Stephen Morris, JINMEI Tatuya, Paul Vixie, Mark
+      Andrews and David Dragon for reviewing a pre-draft proposal and
+      providing support, comments and suggestions.</t>
+    </section>
+
+  </middle>
+
+  <back>
+
+    <references title="References">
+      &RFC1034; &RFC1035; &RFC5681; &RFC6891;
+    </references>
+
+    <section title="Change History (to be removed before publication)">
+      <t>
+        <list style="symbols">
+
+          <t>
+	  draft-dnsop-dns-message-fragments-00
+          <vspace/>
+          Initial draft.
+          </t>
+
+        </list>
+      </t>
+    </section>
+
+  </back>
+</rfc>
