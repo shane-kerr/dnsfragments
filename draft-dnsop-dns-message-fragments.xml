@@ -60,6 +60,22 @@
       </address>
     </author>
 
+    <author fullname="Shane Kerr" initials="S." surname="Kerr">
+      <organization>Beijing Internet Institute</organization>
+      <!-- TODO: find BII's postal address -->
+      <address>
+        <postal>
+          <street></street>
+          <city>Beijing</city>
+          <code></code>
+          <region></region>
+          <country>CN</country>
+        </postal>
+        <email>shane@biigroup.cn</email>
+        <uri>http://www.biigroup.com/en/</uri>
+      </address>
+    </author>
+
     <date/>
 
     <!-- Meta-data Declarations -->
@@ -71,7 +87,10 @@
 
     <abstract>
       <t>This document describes a method to transmit DNS messages over
-      multiple UDP datagrams by fragmenting them at the application layer.</t>
+      multiple UDP datagrams by fragmenting them at the application
+      layer.  The goal is to allow authoriative servers to successfully
+      reply via UDP, even if problems in the network do not allow large
+      packets through.</t>
     </abstract>
 
   </front>
@@ -86,25 +105,71 @@
 	corresponding DNS reply message is transmitted using one UDP
 	datagram from server to client.</t>
 
-	<t><xref target="RFC1035" /> limited DNS message UDP datagram
-	lengths to a maximum of 512 bytes.</t>
-
 	<t>The upper limit on the size of a DNS message that can be
 	transmitted thus depends on the maximum size of the UDP datagram
 	that can be transmitted successfully from the sender to the
-	receiver.</t>
+	receiver. Typically any size limit only matters for DNS replies,
+	as DNS queries are usually small.</t>
+
+	<t><xref target="RFC1035" /> limited DNS message UDP datagram
+	lengths to a maximum of 512 bytes. <xref target="RFC6891" />
+	allows a requestor to advertise the size of its network stack,
+	removing this length restriction for responders that support
+	EDNS.</t>
 
 	<t>As a UDP datagram is transmitted in a single IP PDU, the size
 	of a UDP datagram (including various lower internet layer
 	headers) can be as large as 64 KiB. But practically, the maximum
 	size is often limited by various factors in the sender's
 	environment.</t>
+	
+	<t>One of these limitations is that if the datagram size exceeds
+	the path MTU (Shane: find a reference), then the datagram will
+	either be fragmented at the IP layer, or will be dropped. In
+	IPv4 IP-layer fragmentation often fails, usually due to
+	middleboxes. A client will need to wait for a timeout, then
+	engage heuristics to try to get an answer without any way of
+	knowing why. IPv6 has no IP-layer fragmentation, and relies on
+	PMTU discovery by endpoints, which is difficult to support on
+	DNS servers, and therefore rarely supported.</t> 
+
+	<t>DNS message fragmentation attempts to work around this issue
+	by splitting a single DNS message across multiple UDP DNS
+	packets.</t>
       </section>
+
       <section title="Goals">
+	<t>When possible, we should avoid dropped packets, as this means
+	the client must wait for a timeout, which is a high cost.</t>
+
+      	<t>Since UDP requires fewer packets on the wire and less state
+	on servers than TCP, we would like to avoid having to fall back
+	to TCP when possible.</t>
       </section>
     </section>
 
     <section title="DNS Message Fragmentation Method">
+      <section title="Client Behavior">
+      Clients supporting DNS message fragmentation add an EDNS option to
+      their query that declares their support.
+
+      If a DNS reply is received that has been fragmented, then the
+      client collect all of the fragments and use them to reconstruct
+      the full DNS message. Clients MUST have a maximum time waiting for
+      the fragments to arrive.
+
+      Clients MUST be able to reassemble fragments into a DNS message of
+      any size, up to the maximum of 65K.
+
+      The client MAY save information about what sizes of packets have
+      been received from a given server. If saved, this information MUST
+      have a limited duration.
+
+      Shane: Do we want discussion of resolver behavior in particular?
+      My thinking is that this belongs in another section...
+      </section>
+      <section title="Server Behavior">
+      </section>
       <t>
 	<list style="symbols">
 	  <t>The FRAGMENT option MUST NOT be present in DNS query
@@ -128,12 +193,6 @@
 	  port, message ID) without using any data from them.</t>
 	</list>
       </t>
-
-      <t>TBD: Should we support fragmentation in query messages? This
-      could complicate fire-and-forget style authoritative servers into
-      maintaining state and could become a handy tool for attacking
-      authoritative servers with floods, similar in nature to TCP SYN
-      floods.</t>
     </section>
 
     <section title="The FRAGMENT EDNS(0) Option">
@@ -201,6 +260,8 @@
 	be lost due to interference and other environmental
 	factors. With larger numbers of message fragments, the
 	probability of fragment loss increases.</t>
+
+	cookies
       </section>
 
       <section title="Implementation Requirements">
@@ -210,7 +271,8 @@
     </section>
 
     <section title="Security Considerations">
-      <t>TBD.</t>
+      <t>To avoid DNS amplification or reflection attacks, DNS cookies
+      [REFERENCE NEEDED] must be used.</t>
     </section>
 
     <section title="IANA Considerations">
