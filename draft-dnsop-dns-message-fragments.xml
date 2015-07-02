@@ -6,10 +6,13 @@
      There has to be one entity for each item to be referenced.
      An alternate method (rfc include) is described in the references. -->
 
-<!ENTITY RFC1034 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1034.xml">
 <!ENTITY RFC1035 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1035.xml">
+<!ENTITY RFC1123 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1123.xml">
+<!ENTITY RFC3542 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3542.xml">
 <!ENTITY RFC5681 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5681.xml">
 <!ENTITY RFC6891 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.6891.xml">
+<!ENTITY I-D.dnsop-cookies SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-dnsop-cookies-02.xml">
+<!ENTITY I-D.dnsop-respsize SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-dnsop-respsize-15.xml">
 ]>
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 <!-- used by XSLT processors -->
@@ -60,6 +63,36 @@
       </address>
     </author>
 
+    <author fullname="Shane Kerr" initials="S." surname="Kerr">
+      <organization>Beijing Internet Institute</organization>
+      <address>
+        <postal>
+          <street>2/F, Building 5, No.58 Jinghai Road, BDA</street>
+          <city>Beijing</city>
+          <code>100176</code>
+          <country>CN</country>
+        </postal>
+        <email>shane@biigroup.cn</email>
+        <uri>http://www.biigroup.com/</uri>
+      </address>
+    </author>
+
+
+    <author fullname="Linjian Song" initials="L." surname="Song">
+      <organization>Beijing Internet Institute</organization>
+      <address>
+        <postal>
+          <street>2508 Room, 25th Floor, Tower A, Time Fortune</street>
+          <city>Beijing</city>
+          <region></region>
+          <code>100028</code>
+          <country>P. R. China</country>
+        </postal>
+        <email>songlinjian@gmail.com</email>
+        <uri>http://www.biigroup.com/</uri>
+      </address>
+    </author>
+
     <date/>
 
     <!-- Meta-data Declarations -->
@@ -71,7 +104,10 @@
 
     <abstract>
       <t>This document describes a method to transmit DNS messages over
-      multiple UDP datagrams by fragmenting them at the application layer.</t>
+      multiple UDP datagrams by fragmenting them at the application
+      layer.  The goal is to allow authoritative servers to successfully
+      reply via UDP, even if problems in the network do not allow large
+      packets or TCP/53 through .</t>
     </abstract>
 
   </front>
@@ -86,26 +122,159 @@
 	corresponding DNS reply message is transmitted using one UDP
 	datagram from server to client.</t>
 
-	<t><xref target="RFC1035" /> limited DNS message UDP datagram
-	lengths to a maximum of 512 bytes.</t>
-
 	<t>The upper limit on the size of a DNS message that can be
 	transmitted thus depends on the maximum size of the UDP datagram
 	that can be transmitted successfully from the sender to the
-	receiver.</t>
+	receiver. Typically any size limit only matters for DNS replies,
+	as DNS queries are usually small.</t>
+	
+	<t>As a UDP datagram is transmitted in a single IP PDU, in theory the size
+	of a UDP datagram (including various lower internet layer headers) can be 
+	as large as 64 KiB. But practically, if the datagram size exceeds the path MTU, 
+	then the datagram will either be fragmented at the IP layer, or will be dropped 
+	in the middle. In the case of IPv6 DNS packet is always fragmented by the sender. 
+	If a packet size exceeds the path MTU, Packet Too Big (PTB) ICMP message will be 
+	received by sender with no clue for sender to reply again with smaller size, due 
+	to stateless feature of DNS. So a initiator asks for large DNS response packet 
+	has risk of no response which poison the DNS transaction <xref target="Fragment-Poisonous"/>. 
+	</t>
+	
+	<t>As a result, a practical DNS payload size limitation is necessary. <xref target="RFC1035" /> 
+		limited DNS message UDP datagram lengths to a maximum of 512 bytes. 
+		Although EDNS0<xref target="RFC6891" /> allows a initiator to advertise the capability 
+		of receiving lager packets(up to 4096 byte), it leads to fragmentation 
+		because practically most packets are limited to 1500 bytes long due to host-ethernet 
+		interfaces, or 1280 bytes long due to minimum IPv6 MTU in IPv6 stack <xref target="RFC3542" />. </t> 
+		 
+	<t>According to the DNS specification<xref target="RFC1123" />,if the DNS response message 
+		can not fit within the packets size limit, the response is truncated and 
+		the initiator will use TCP as a fallback to re-query for large response. 
+		However, not to mention the high cost introduced by TCP, some 
+		firewalls and middle boxes even block TCP/53 which cause no response issue as well.  
+		It become a notable issue when the DNS response size inevitably increase in the case of DNSSEC deployment .</t>
 
-	<t>As a UDP datagram is transmitted in a single IP PDU, the size
-	of a UDP datagram (including various lower internet layer
-	headers) can be as large as 64 KiB. But practically, the maximum
-	size is often limited by various factors in the sender's
-	environment.</t>
+
+	<t>In this memo, DNS message fragmentation attempts to work around the DNS payload limitation 
+		and middle box misbehavior by splitting a single DNS message across multiple UDP DNS packets. Note that to avoid DNS amplification or reflection attacks,
+      DNS cookies <xref target="I-D.ietf-dnsop-cookies"/> must be used.</t>
       </section>
-      <section title="Goals">
-      </section>
+
+      <section title="Motivation">
+	<t>It is not a new topic regarding large DNS packets(>512B) issue <xref target="I-D.ietf-dnsop-respsize"/>, 
+		starting from introduction of IPv6, EDNS0 <xref target="SAC016"/>, and DNSSEC deployment<xref target="SAC035"/>. In current 
+		production network, DNSSEC with longer Key (ZSK>1024B and KSK>2048B) will coin larger response 
+		packets no less than 1500B<xref target="T-DNS"/>. Especially during the KSK rollover process, the response to the query of DNSKEY 
+		RRset will be enlarged by containing both the new and old KSK. </t>
+		
+	<t>When possible, we should avoid dropped packets, as this means the client must wait for a timeout, 
+		which is a high cost. For example, a validator behind a firewall suffers from the timeout with no response, 
+		if the firwall drops large EDNS0 packets and IP fragement. It may even cause disaster when the validator can not 
+		recieve response for new trust anchor KSK due to the extreme case of stupid middle box which also drop TCP/53.</t>
+		
+		
+		<t>Since UDP requires fewer packets on the wire and less state on servers than TCP, in this memo we still 
+			propose UDP as transmission protocol but fragment the larger DNS packets into small DNS packets. 
+			We would like the fragments can easily go through the middle box and avoid having to fal back to TCP when possible as well.</t> 
+			
+			<t>Note that this mechanism is not necessary to replace all DNS transaction. It can be triggered by 
+			some event or used for special case like KSK rollover process. </t>
+
+	      </section>
     </section>
 
     <section title="DNS Message Fragmentation Method">
-      <t>
+      <section title="Client Behavior">
+	<t>Clients supporting DNS message fragmentation add an EDNS
+	option to their queries, which declares their support.</t>
+
+	<t>If a DNS reply is received that has been fragmented, it
+	will consist of DNS messages in UDP packets, which have an
+	EDNS option which says how many total fragments there are, and
+	the sequence number that the current packet represents. The
+	client collects all of the fragments and use them to
+	reconstruct the full DNS message. Clients MUST have a maximum
+	time waiting for all of the fragments to arrive.</t>
+
+	<t>Clients MUST be able to reassemble fragments into a DNS
+	message of any size, up to the maximum of 65K.</t>
+
+	<t>The client MAY save information about what sizes of packets
+	have been received from a given server. If saved, this
+	information MUST have a limited duration.</t>
+
+	<t>Any DNSSEC validation is performed on the reassembled
+	packet.</t>
+
+	<t> Shane: Do we want discussion of resolver behavior in particular?
+        My thinking is that this belongs in another section, if at
+	all...</t>
+      </section>
+      <section title="Server Behavior">
+        <t>Servers supporting DNS message fragmentation will look for
+	the EDNS option which declares client support. If not present,
+	the server MUST NOT use DNS message fragmentation.</t>
+
+	<t>The server prepares the response normally. If it exceeds
+	the maximum packet size specified by the client, then it will
+	fragment the reply.</t>
+
+	<t>Each fragment contains the same DNS header, possibly
+	varying only with the answer count, authority count, and
+	additional count. As many RR are included in each fragment as
+	are possible without going over the desired size of the
+	fragment. An EDNS option is added which includes both the
+	fragment sequence number and the total number of
+	fragments.</t>
+
+	<t>The server needs to know how many total fragments there
+	are as it generates each fragment. A simple approach would be
+	to create each fragment, and then count the total number at
+	the end, and update the previously-generated fragments with
+	the total number of fragments. Other techniques may be
+	possible.</t>
+
+	<t>The server SHOULD limit the number of fragments that it
+	uses in a reply.</t>
+
+	<texttable>
+	  <preamble>The server should use the following sizes for each
+	  packet in the sequence in IPv4:</preamble>
+	  <ttcol>Fragment ID</ttcol>
+	  <ttcol>Size</ttcol>
+	  <c>1</c><c>min(512, client_specified_max)</c>
+	  <c>2</c><c>min(1460, client_specified_max)</c>
+	  <c>3</c><c>min(1480, client_specified_max)</c>
+	  <c>N</c><c>min(1480, client_specified_max)</c>
+	  <postamble>The idea is that the first packet will always get
+	  through since if a 512 octet packet doesn't work, DNS does
+	  not function. We then increase to sizes that are likely to
+	  get through. 1460 is the 1500 octet Ethernet packet size,
+	  minus the IP header overhead and enough space to support
+	  tunneled traffic. 1480 is the 1500 octet Ethernet packet
+	  size, minus the IP header overhead.
+	  </postamble>
+	</texttable>
+
+	<texttable>
+	  <preamble>The server should use the following sizes for each
+	  packet in the sequence in IPv6:</preamble>
+	  <ttcol>Fragment ID</ttcol>
+	  <ttcol>Size</ttcol>
+	  <c>1</c><c>min(1240, client_specified_max)</c>
+	  <c>2</c><c>min(1420, client_specified_max)</c>
+	  <c>3</c><c>min(1460, client_specified_max)</c>
+	  <c>N</c><c>min(1460, client_specified_max)</c>
+	  <postamble>Like with IPv4, the idea is that the first packet
+	  will always get through. In this case we use the
+	  IPv6-mandated 1280 octets, minus the IP header overhead.
+	  We then increase to 1420, which is the 1500 octet Ethernet
+	  packet size, minus the IP header overhead and enough space
+	  to support tunneled traffic. 1460 is the 1500 octet Ethernet
+	  packet size, minus the IP header overhead.
+	  </postamble>
+	</texttable>
+      </section>
+      <section title="Other Notes"><t>
 	<list style="symbols">
 	  <t>The FRAGMENT option MUST NOT be present in DNS query
 	  messages, i.e., when QR=0. If a DNS implementation notices the
@@ -120,20 +289,39 @@
 	  tuple (server IP, port, message ID) without using any data
 	  from them.</t>
 
+          <t>Shane: why are we setting TC?</t>
+
 	  <t>More than one FRAGMENT option MUST NOT be present in a DNS
 	  reply message fragment datagram. If a DNS implementation
 	  notices multiple FRAGMENT options in a DNS reply message
 	  fragment datagram, it MUST drop all reply datagrams received
 	  for that message's corresponding question tuple (server IP,
 	  port, message ID) without using any data from them.</t>
-	</list>
-      </t>
+	</list></t>
+      </section>
+    </section>
 
-      <t>TBD: Should we support fragmentation in query messages? This
-      could complicate fire-and-forget style authoritative servers into
-      maintaining state and could become a handy tool for attacking
-      authoritative servers with floods, similar in nature to TCP SYN
-      floods.</t>
+    <section title="The ALLOW-FRAGMENTS EDNS(0) Option">
+
+      <t>ALLOW-FRAGMENTS is an EDNS(0) <xref target="RFC6891" />
+      option that a client uses to inform a server that it supports
+      fragmented responses.</t>
+
+      <section title="Wire Format">
+	<t>TBD.</t>
+      </section>
+
+      <section title="Option Fields">
+	<section title="Maximum Fragment Size">
+	  <t>The Maximum Fragment Size field is represented as an
+	  unsigned 16-bit integer. This is the maximum size used by
+	  any given fragment the server returns.</t>
+	</section>
+      </section>
+      <section title="Presentation Format">
+	<t>As with other EDNS(0) options, the ALLOW-FRAGMENTS option
+	does not have a presentation format.</t>
+      </section>
     </section>
 
     <section title="The FRAGMENT EDNS(0) Option">
@@ -210,17 +398,18 @@
     </section>
 
     <section title="Security Considerations">
-      <t>TBD.</t>
+      <t>To avoid DNS amplification or reflection attacks,
+      DNS cookies <xref target="I-D.ietf-dnsop-cookies"/> must be used.</t>
     </section>
 
     <section title="IANA Considerations">
-      <t>The FRAGMENT EDNS(0) option requires an option code to be
-      assigned for it.</t>
+      <t>The ALLOW-FRAGMENTS and FRAGMENT EDNS(0) options require
+      option codes to be assigned for them.</t>
     </section>
 
     <section title="Acknowledgements">
       <t>Thanks to Stephen Morris, JINMEI Tatuya, Paul Vixie, Mark
-      Andrews and David Dragon for reviewing a pre-draft proposal and
+      Andrews, and David Dragon for reviewing a pre-draft proposal and
       providing support, comments and suggestions.</t>
     </section>
 
@@ -229,8 +418,46 @@
   <back>
 
     <references title="References">
-      &RFC1034; &RFC1035; &RFC5681; &RFC6891;
-    </references>
+      &RFC1035;&RFC1123; &RFC5681; &RFC6891;&RFC3542;
+      &I-D.dnsop-cookies;&I-D.dnsop-respsize;
+
+    <reference anchor="Fragment-Poisonous">
+	            <front>
+	                <title>Fragmentation Considered Poisonous</title>
+			<author fullname="Herzberg, A."  initials="A." surname="Herzberg"></author>
+			<author fullname=" H. Shulman"  initials="H." surname="Shulman"></author>
+			<date year="2012" />            
+	            </front>
+	   </reference>
+	   <reference anchor="SAC016">
+            <front>
+                <title>Testing Firewalls for IPv6 and EDNS0 Support</title>
+                <author>
+                    <organization>ICANN Security and Stability Advisory Committee</organization>
+                </author>
+                <date year="2007" />
+            </front>
+     </reference>
+     
+     <reference anchor="T-DNS" target="http://www.isi.edu/~johnh/PAPERS/Zhu14b.pdf">
+	        <front>
+	                <title>T-DNS: Connection-Oriented DNS to Improve Privacy and Security (extended)</title>
+			<author fullname="Liang Zhu"  initials="L" surname="Zhu"></author>
+			<author fullname="Zi Hu"  initials="Z" surname="Hu"></author>
+			<author fullname="J. Heidemann"  initials="J." surname="Heidemann"></author>
+			<date year="2007" />            
+		</front>
+	</reference>
+		   <reference anchor="SAC035">
+            <front>
+                <title>DNSSEC Impact on Broadband Routers and Firewalls </title>
+                <author>
+                    <organization>ICANN Security and Stability Advisory Committee</organization>
+                </author>
+                <date year="2008" />
+            </front>
+     </reference>
+     </references>
 
     <section title="Change History (to be removed before publication)">
       <t>
