@@ -133,64 +133,70 @@
 	headers) can be as large as 64 KiB. But practically, if the datagram 
 	size exceeds the path MTU, then the datagram will either be fragmented 
 	at the IP layer, or will be dropped in the middle. In the case of IPv6 
-	DNS packet is always fragmented by the sender. If a packet size exceeds 
-	the path MTU, Packet Too Big (PTB) ICMP message will be received by 
-	sender with no clue for sender to reply again with smaller size, due to 
-	stateless feature of DNS. So a initiator asks for large DNS response packet 
-	has risk of no response which poison the DNS transaction <xref target="Fragment-Poisonous"/>. 
+	DNS packet is always fragmented by the sender. If a packet size 
+	exceeds the path MTU, Packet Too Big (PTB) ICMP message will be 
+	received by sender with no clue for sender to reply again with 
+	smaller size, due to stateless feature of DNS. So a initiator asks 
+	for large DNS response packet has risk of no response which poison 
+	the DNS transaction <xref target="Fragment-Poisonous"/>. 
 	</t>
 	
 	<t>As a result, a practical DNS payload size limitation is necessary. 
-	<xref target="RFC1035" /> limited DNS message UDP datagram lengths to a 
-	maximum of 512 bytes. Although EDNS0<xref target="RFC6891" /> allows a 
-	initiator to advertise the capability of receiving lager packets(up to 
-	4096 byte), it leads to fragmentation because practically most packets 
-	are limited to 1500 bytes long due to host-ethernet interfaces, or 1280 
-	bytes long due to minimum IPv6 MTU in IPv6 stack <xref target="RFC3542" />. </t> 
+	<xref target="RFC1035" /> limited DNS message UDP datagram lengths to 
+	a maximum of 512 bytes. Although EDNS0<xref target="RFC6891" /> 
+	allows a initiator to advertise the capability of receiving lager 
+	packets(up to 4096 byte), it leads to fragmentation because practically 
+	most packets are limited to 1500 bytes long due to host-ethernet
+	interfaces, or 1280 bytes long due to minimum IPv6 MTU in IPv6 stack
+        <xref target="RFC3542" />.</t> 
 		 
-	<t>According to the DNS specification<xref target="RFC1123" />,if the DNS 
-	response message can not fit within the packets size limit, the response 
-	is truncated and the initiator will use TCP as a fallback to re-query for 
-	large response. However, not to mention the high cost introduced by TCP, 
-	some firewalls and middle boxes even block TCP/53 which cause no response 
-	issue as well. It become a notable issue when the DNS response size inevitably 
-	increase in the case of DNSSEC deployment .</t>
+	<t>According to the DNS specification<xref target="RFC1123" />,if 
+	the DNS response message can not fit within the packets size limit, 
+	the response is truncated and the initiator will use TCP as a fallback 
+	to re-query for large response. However, not to mention the high 
+	cost introduced by TCP, some firewalls and middle boxes even block 
+	TCP/53 which cause no response issue as well.  It become a notable 
+	issue when the DNS response size inevitably increase in the case of 
+	DNSSEC deployment .</t>
 
 
-	<t>In this memo, DNS message fragmentation attempts to work around the DNS 
-	payload limitation and middle box misbehavior by splitting a single DNS message 
-	across multiple UDP DNS packets. Note that to avoid DNS amplification or 
-	reflection attacks, DNS cookies <xref target="I-D.ietf-dnsop-cookies"/> must be used.</t>
+	<t>In this memo, DNS message fragmentation attempts to work around 
+	the DNS payload limitation and middle box misbehavior by splitting 
+	a single DNS message across multiple UDP DNS packets. Note that 
+	to avoid DNS amplification or reflection attacks, DNS cookies 
+	<xref target="I-D.ietf-dnsop-cookies"/> must be used.</t>
       </section>
 
       <section title="Motivation">
-	<t>It is not a new topic regarding large DNS packets(>512B) issue 
-	<xref target="I-D.ietf-dnsop-respsize"/>, starting from introduction of 
-	IPv6, EDNS0 <xref target="SAC016"/>, and DNSSEC deployment <xref target="SAC035"/>. 
-	In current production network, DNSSEC with longer Key (ZSK>1024B and KSK>2048B) 
-	will coin larger response packets no less than 1500B<xref target="T-DNS"/>. 
-	Especially during the KSK rollover process, the response to the query of DNSKEY	
-	RRset will be enlarged by containing both the new and old KSK. </t>
+	<t>It is a old topic, and there many measurement studies regarding
+        large DNS packets (>512B) <xref target="I-D.ietf-dnsop-respsize"/>.
+	Starting from introduction of IPv6, EDNS0 <xref target="SAC016"/>, 
+	and DNSSEC <xref target="SAC035"/>. The 512 byte DNS Maximum 
+	Transmission Unit has probably done more to retard the DNS than any 
+	other single factor. In current production network, DNSSEC with longer
+	Key (ZSK>1024B and KSK>2048B) will coin larger response 
+	packets no less than 1500B<xref target="T-DNS"/>. Especially during the 
+	KSK rollover process, the response to the query of DNSKEY RRset will be 
+	enlarged by containing both the new and old KSK. </t>
 		
-	<t>When possible, we should avoid dropped packets, as this means the client 
-	must wait for a timeout, which is a high cost. For example, a validator 
-	behind a firewall suffers from the timeout with no response, if the firwall 
-	drops large EDNS0 packets and IP fragement. It may even cause disaster when 
-	the validator can not recieve response for new trust anchor KSK due to the 
-	extreme case of stupid middle box which also drop TCP/53.</t>
+	<t>When possible, we should avoid dropped packets, as this means the 
+	client must wait for a timeout, which is a high cost. For example, 
+	a validator behind a firewall suffers from the timeout with no response, 
+	if the firwall drops large EDNS0 packets and IP fragement. It may 
+	even cause disaster when the validator can not recieve response for 
+	new trust anchor KSK due to the extreme case of stupid middle box 
+	which also drop TCP/53.</t>
 		
-		
-	<t>Since UDP requires fewer packets on the wire and less state on servers 
-	than TCP, in this memo we still propose UDP as transmission protocol but 
-	fragment the larger DNS packets into small DNS packets. We would like the 
-	fragments can easily go through the middle box and avoid having to fal 
-	back to TCP when possible as well.</t> 
+	<t>Since UDP requires fewer packets on the wire and less state on 
+	servers than TCP, in this memo we still propose UDP as transmission 
+	protocol but fragment the larger DNS packets into small DNS packets. 
+	We would like the fragments can easily go through the middle box 
+	and avoid having to fal back to TCP when possible as well.</t> 
 			
-	<t>Note that this mechanism is not necessary to replace all DNS transaction. 
-	It can be triggered by some event or used for special case like KSK rollover 
-	process. </t>
-
-	      </section>
+	<t>Note that this mechanism is not necessary to replace all DNS 
+	transaction. It can be triggered by some event or used for 
+	special case like KSK rollover process. </t>
+      </section>
     </section>
 
     <section title="DNS Message Fragmentation Method">
