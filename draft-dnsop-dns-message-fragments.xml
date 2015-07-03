@@ -182,9 +182,9 @@
 	<t>When possible, we should avoid dropped packets, as this means the 
 	client must wait for a timeout, which is a high cost. For example, 
 	a validator behind a firewall suffers from the timeout with no response, 
-	if the firwall drops large EDNS0 packets and IP fragement. It may 
-	even cause disaster when the validator can not recieve response for 
-	new trust anchor KSK due to the extreme case of stupid middle box 
+	if the firwall drops large EDNS0 packets and IP fragments. It may 
+	even cause disaster when the validator can not receive responses for 
+	the new trust anchor KSK due to the extreme case of stupid middle box 
 	which also drop TCP/53.</t>
 		
 	<t>Since UDP requires fewer packets on the wire and less state on 
