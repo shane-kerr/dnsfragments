@@ -167,7 +167,7 @@
       </section>
 
       <section title="Motivation">
-	<t>It is a old topic and there many measument studie regarding large 
+	<t>It is not a new topic and there many measument studies regarding large 
 	DNS packets(>512B) issue <xref target="I-D.ietf-dnsop-respsize"/>, 
 	starting from introduction of IPv6, EDNS0 <xref target="SAC016"/>, 
 	and DNSSEC <xref target="SAC035"/>. The 512 byte DNS Maximum 
