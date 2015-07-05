@@ -143,25 +143,32 @@
 	<xref target="Fragment-Poisonous"/>.
 	</t>
 
-	<t>As a result, a practical DNS payload size limitation is necessary.
-	<xref target="RFC1035" /> limited DNS message UDP datagram lengths to a
-	maximum of 512 bytes. Although EDNS(0) <xref target="RFC6891" /> allows an
-	initiator to advertise the capability of receiving lager packets (up to
-	4096 bytes), it leads to fragmentation because practically most packets
-	are limited to 1500 byte size due to host Ethernet interfaces, or 1280
-	byte size due to minimum IPv6 MTU in the IPv6 stack <xref target="RFC3542" />. </t>
+	<t>As a result, a practical DNS payload size limitation is
+	necessary.  <xref target="RFC1035" /> limited DNS message UDP
+	datagram lengths to a maximum of 512 bytes. Although EDNS(0)
+	<xref target="RFC6891" /> allows an initiator to advertise the
+	capability of receiving lager packets (up to 4096 bytes), it
+	leads to fragmentation because practically most packets are
+	limited to 1500 byte size due to host Ethernet interfaces, or
+	1280 byte size due to minimum IPv6 MTU in the IPv6 stack <xref
+	target="RFC3542" />. </t>
 
-	<t>According to DNS specifications <xref target="RFC1035" />, if the DNS
-	response message can not fit within the packet's size limit, the response
-	is truncated and the initiator will have to use TCP as a fallback to re-query to receive
-	large response. However, not to mention the high setup cost introduced by TCP due to additional roundtrips,
-	some firewalls and middle boxes even block TCP/53 which cause no responses
-	to be received as well. It becomes a significant issue when the DNS response size inevitably
-	increases with DNSSEC deployment.</t>
+	<t>According to DNS specifications <xref target="RFC1035" />, if
+	the DNS response message can not fit within the packet's size
+	limit, the response is truncated and the initiator will have to
+	use TCP as a fallback to re-query to receive large
+	response. However, not to mention the high setup cost introduced
+	by TCP due to additional roundtrips, some firewalls and middle
+	boxes even block TCP/53 which cause no responses to be received
+	as well. It becomes a significant issue when the DNS response
+	size inevitably increases with DNSSEC deployment.</t>
 
-	<t>In this memo, DNS message fragmentation attempts to work around middle box misbehavior by splitting a single DNS message
-	across multiple UDP datagrams. Note that to avoid DNS amplification and
-	reflection attacks, DNS cookies <xref target="I-D.ietf-dnsop-cookies"/> is a mandatory requirement when using DNS message fragments.</t>
+	<t>In this memo, DNS message fragmentation attempts to work
+	around middle box misbehavior by splitting a single DNS message
+	across multiple UDP datagrams. Note that to avoid DNS
+	amplification and reflection attacks, DNS cookies <xref
+	target="I-D.ietf-dnsop-cookies"/> is a mandatory requirement
+	when using DNS message fragments.</t>
       </section>
 
       <section title="Motivation">
