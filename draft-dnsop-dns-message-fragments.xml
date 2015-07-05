@@ -207,30 +207,35 @@
     <section title="DNS Message Fragmentation Method">
       <section title="Client Behavior">
 	<t>Clients supporting DNS message fragmentation add an EDNS
-	option to their queries, which declares their support.</t>
+	option to their queries, which declares their support for this
+	feature.</t>
 
-	<t>If a DNS reply is received that has been fragmented, it
-	will consist of DNS messages in UDP packets, which have an
-	EDNS option which says how many total fragments there are, and
-	the sequence number that the current packet represents. The
-	client collects all of the fragments and use them to
-	reconstruct the full DNS message. Clients MUST have a maximum
-	time waiting for all of the fragments to arrive.</t>
+	<t>If a DNS reply is received that has been fragmented, it will
+	consist of multiple DNS message fragments (each transmitted in a
+	respective UDP packet), and every fragment contain an EDNS option
+	which says how many total fragments there are, and the fragment
+	number that the current packet represents. The client collects
+	all of the fragments and uses them to reconstruct the full DNS
+	message. Clients MUST maintain a timeout when waiting for the
+	fragments to arrive.</t>
 
-	<t>Clients MUST be able to reassemble fragments into a DNS
-	message of any size, up to the maximum of 65K.</t>
+	<t>Clients that support DNS message fragments MUST be able to
+	reassemble fragments into a DNS message of any size, up to the
+	maximum of 64KiB.</t>
 
-	<t>The client MAY save information about what sizes of packets
-	have been received from a given server. If saved, this
-	information MUST have a limited duration.</t>
+	<t>[**FIXME**] The client MAY save information about what sizes
+	of packets have been received from a given server. If saved,
+	this information MUST have a limited duration.</t>
 
-	<t>Any DNSSEC validation is performed on the reassembled
-	packet.</t>
+	<t>Any DNSSEC validation is performed on the reassembled DNS
+	message.</t>
 
-	<t> Shane: Do we want discussion of resolver behavior in particular?
-        My thinking is that this belongs in another section, if at
-	all...</t>
+	<t>[**FIXME**] Shane: Do we want discussion of resolver behavior
+	in particular? My thinking is that this belongs in another
+	section, if at all. Mukund: I feel it needs some discussion, at
+	least to make things clear to an implementor.</t>
       </section>
+
       <section title="Server Behavior">
         <t>Servers supporting DNS message fragmentation will look for
 	the EDNS option which declares client support. If not present,
