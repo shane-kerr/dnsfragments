@@ -151,18 +151,17 @@
 	are limited to 1500 byte size due to host Ethernet interfaces, or 1280
 	byte size due to minimum IPv6 MTU in the IPv6 stack <xref target="RFC3542" />. </t>
 
-	<t>According to the DNS specification<xref target="RFC1123" />, if the DNS
-	response message can not fit within the packets size limit, the response
-	is truncated and the initiator will use TCP as a fallback to re-query for
-	large response. However, not to mention the high cost introduced by TCP,
-	some firewalls and middle boxes even block TCP/53 which cause no response
-	issue as well. It become a notable issue when the DNS response size inevitably
-	increase in the case of DNSSEC deployment .</t>
+	<t>According to DNS specifications <xref target="RFC1035" />, if the DNS
+	response message can not fit within the packet's size limit, the response
+	is truncated and the initiator will have to use TCP as a fallback to re-query to receive
+	large response. However, not to mention the high setup cost introduced by TCP due to additional roundtrips,
+	some firewalls and middle boxes even block TCP/53 which cause no responses
+	to be received as well. It becomes a significant issue when the DNS response size inevitably
+	increases with DNSSEC deployment.</t>
 
-	<t>In this memo, DNS message fragmentation attempts to work around the DNS
-	payload limitation and middle box misbehavior by splitting a single DNS message
-	across multiple UDP DNS packets. Note that to avoid DNS amplification or
-	reflection attacks, DNS cookies <xref target="I-D.ietf-dnsop-cookies"/> must be used.</t>
+	<t>In this memo, DNS message fragmentation attempts to work around middle box misbehavior by splitting a single DNS message
+	across multiple UDP datagrams. Note that to avoid DNS amplification and
+	reflection attacks, DNS cookies <xref target="I-D.ietf-dnsop-cookies"/> is a mandatory requirement when using DNS message fragments.</t>
       </section>
 
       <section title="Motivation">
