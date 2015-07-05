@@ -373,8 +373,9 @@
       <section title="Option Fields">
 	<section title="Maximum Fragment Size">
 	  <t>The Maximum Fragment Size field is represented as an
-	  unsigned 16-bit integer. This is the maximum size used by
-	  any given fragment the server returns.</t>
+	  unsigned 16-bit integer. This is the maximum size used by any
+	  given fragment the server returns. [**FIXME**] This field's
+	  purpose has to be explained.</t>
 	</section>
       </section>
       <section title="Presentation Format">
@@ -387,7 +388,7 @@
 
       <t>FRAGMENT is an EDNS(0) <xref target="RFC6891" /> option that
       assists a client in gathering the various fragments of a DNS
-      message from multiple UDP datagrams. It is described in the
+      message from multiple UDP datagrams. It is described in a
       previous section. Here, its syntax is provided.</t>
 
       <section title="Wire Format">
