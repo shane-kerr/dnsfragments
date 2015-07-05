@@ -105,9 +105,9 @@
     <abstract>
       <t>This document describes a method to transmit DNS messages over
       multiple UDP datagrams by fragmenting them at the application
-      layer.  The goal is to allow authoriative servers to successfully
-      reply via UDP, even if problems in the network do not allow large
-      packets or TCP/53 through .</t>
+      layer. The objective is to allow authoriative servers to
+      successfully reply to DNS queries via UDP when larger datagrams
+      don't pass through the network successfully.</t>
     </abstract>
 
   </front>
