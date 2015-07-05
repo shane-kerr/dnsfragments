@@ -128,16 +128,19 @@
 	receiver. Typically any size limit only matters for DNS replies,
 	as DNS queries are usually small.</t>
 
-	<t>As a UDP datagram is transmitted in a single IP PDU, in theory
-	the size of a UDP datagram (including various lower internet layer
-	headers) can be as large as 64 KiB. But practically, if the datagram
-	size exceeds the path MTU, then the datagram will either be fragmented
-	at the IP layer, or will be dropped in the middle. In the case of IPv6
-	DNS packet is always fragmented by the sender. If a packet size exceeds
-	the path MTU, Packet Too Big (PTB) ICMP message will be received by
-	sender with no clue for sender to reply again with smaller size, due to
-	stateless feature of DNS. So a initiator asks for large DNS response packet
-	has risk of no response which poison the DNS transaction <xref target="Fragment-Poisonous"/>.
+	<t>As a UDP datagram is transmitted in a single IP PDU, in
+	theory the size of a UDP datagram (including various lower
+	internet layer headers) can be as large as 64 KiB. But
+	practically, if the datagram size exceeds the path MTU, then the
+	datagram will either be fragmented at the IP layer, or worse
+	dropped, by a forwarder. In the case of IPv6, DNS packets are
+	fragmented by the sender only. If a packet's size exceeds the
+	path MTU, a Packet Too Big (PTB) ICMP message will be received
+	by sender without any clue to the sender to reply again with a
+	smaller sized message, due to the stateless feature of
+	DNS. [**FIXME**] So an initiator asks for large DNS response
+	packet has risk of no response which poison the DNS transaction
+	<xref target="Fragment-Poisonous"/>.
 	</t>
 
 	<t>As a result, a practical DNS payload size limitation is necessary.
@@ -148,7 +151,7 @@
 	are limited to 1500 bytes long due to host-ethernet interfaces, or 1280
 	bytes long due to minimum IPv6 MTU in IPv6 stack <xref target="RFC3542" />. </t>
 
-	<t>According to the DNS specification<xref target="RFC1123" />,if the DNS
+	<t>According to the DNS specification<xref target="RFC1123" />, if the DNS
 	response message can not fit within the packets size limit, the response
 	is truncated and the initiator will use TCP as a fallback to re-query for
 	large response. However, not to mention the high cost introduced by TCP,
