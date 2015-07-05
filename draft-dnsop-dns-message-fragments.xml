@@ -212,12 +212,12 @@
 
 	<t>If a DNS reply is received that has been fragmented, it will
 	consist of multiple DNS message fragments (each transmitted in a
-	respective UDP packet), and every fragment contain an EDNS option
-	which says how many total fragments there are, and the fragment
-	number that the current packet represents. The client collects
-	all of the fragments and uses them to reconstruct the full DNS
-	message. Clients MUST maintain a timeout when waiting for the
-	fragments to arrive.</t>
+	respective UDP packet), and every fragment contain an EDNS
+	option which says how many total fragments there are, and the
+	identifier of the fragment that the current packet
+	represents. The client collects all of the fragments and uses
+	them to reconstruct the full DNS message. Clients MUST maintain
+	a timeout when waiting for the fragments to arrive.</t>
 
 	<t>Clients that support DNS message fragments MUST be able to
 	reassemble fragments into a DNS message of any size, up to the
@@ -238,53 +238,72 @@
 
       <section title="Server Behavior">
         <t>Servers supporting DNS message fragmentation will look for
-	the EDNS option which declares client support. If not present,
-	the server MUST NOT use DNS message fragmentation.</t>
+        the EDNS option which declares client support for the
+        feature. If not present, the server MUST NOT use DNS message
+        fragmentation. The server MUST check that DNS cookies are
+        supported. [**FIXME**] Implementation of the first request case,
+        where no existing established cookie is available needs
+        discussion; we want to avoid additional round-trips here.</t>
 
-	<t>The server prepares the response normally. If it exceeds
-	the maximum packet size specified by the client, then it will
-	fragment the reply.</t>
+	<t>The server prepares the response DNS message normally. If the
+	message exceeds the maximum UDP payload size specified by the
+	client, then it should fragment the message into multiple UDP
+	datagrams.</t>
 
-	<t>Each fragment contains the same DNS header, possibly
-	varying only with the answer count, authority count, and
-	additional count. As many RR are included in each fragment as
-	are possible without going over the desired size of the
-	fragment. An EDNS option is added which includes both the
-	fragment sequence number and the total number of
-	fragments.</t>
+	<t>[**FIXME**] The TC=1 logic, and how an existing
+	implementation that does not know about DNS messages fragments
+	handles these datagrams, has to be better explained here.</t>
+	
+	<t>Each fragment contains an identical DNS header with TC=1,
+	possibly varying only in the section counts. [**FIXME**] As many
+	RR are included in each fragment as are possible without going
+	over the desired size of the fragment. An EDNS option is added
+	to every fragment, that includes both the fragment identifier
+	and the total number of fragments.</t>
 
 	<t>The server needs to know how many total fragments there
-	are as it generates each fragment. A simple approach would be
-	to create each fragment, and then count the total number at
+	are to insert into each fragment. A simple approach would be
+	to generate all fragments, and then count the total number at
 	the end, and update the previously-generated fragments with
 	the total number of fragments. Other techniques may be
 	possible.</t>
 
-	<t>The server SHOULD limit the number of fragments that it
-	uses in a reply.</t>
+	<t>The server MUST limit the number of fragments that it uses in
+	a reply. [**FIXME**] Why? We should explain risk of congestion,
+	packet loss, etc. We should also set upper limits.</t>
 
+	<t>[**FIXME**] The following needs further discussion about the
+	sizes; also an upper limit for each *fragment* has to be the
+	client's UDP payload size as it is the driver and it alone knows
+	the ultimate success/failure of message delivery. So if it sets
+	a maximum payload size of 1200, there's no point in trying
+	1460. Clients that support DNS message fragments (and signal
+	support using the EDNS option) should adapt their UDP payload
+	size discovery algorithm to work with this feature, as the
+	following splits on sizes will assist PMTU discovery.</t>
+	
 	<texttable>
 	  <preamble>The server should use the following sizes for each
-	  packet in the sequence in IPv4:</preamble>
+	  fragment in the sequence in IPv4:</preamble>
 	  <ttcol>Fragment ID</ttcol>
 	  <ttcol>Size</ttcol>
 	  <c>1</c><c>min(512, client_specified_max)</c>
 	  <c>2</c><c>min(1460, client_specified_max)</c>
 	  <c>3</c><c>min(1480, client_specified_max)</c>
 	  <c>N</c><c>min(1480, client_specified_max)</c>
-	  <postamble>The idea is that the first packet will always get
-	  through since if a 512 octet packet doesn't work, DNS does
-	  not function. We then increase to sizes that are likely to
+	  <postamble>The rationale is that the first packet will always get
+	  through, since if a 512 octet packet doesn't work, DNS cannot
+	  function. We then increase to sizes that are likely to
 	  get through. 1460 is the 1500 octet Ethernet packet size,
 	  minus the IP header overhead and enough space to support
 	  tunneled traffic. 1480 is the 1500 octet Ethernet packet
-	  size, minus the IP header overhead.
+	  size, minus the IP header overhead. [**FIXME**] Why not add 1240 here?
 	  </postamble>
 	</texttable>
 
 	<texttable>
 	  <preamble>The server should use the following sizes for each
-	  packet in the sequence in IPv6:</preamble>
+	  packet in the sequence in IPv6:</preamble>	  
 	  <ttcol>Fragment ID</ttcol>
 	  <ttcol>Size</ttcol>
 	  <c>1</c><c>min(1240, client_specified_max)</c>
