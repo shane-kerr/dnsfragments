@@ -331,27 +331,40 @@
 	  TC=0. If a DNS implementation notices the FRAGMENT option in a
 	  DNS reply message fragment datagram that is not truncated,
 	  i.e, when TC=0, it MUST drop all DNS reply message fragment
-	  datagrams received for that message's corresponding question
-	  tuple (server IP, port, message ID) without using any data
-	  from them.</t>
+	  datagrams received so far (awaiting assembly) for that
+	  message's corresponding question tuple (server IP, port,
+	  message ID) without using any data from them. [**FIXME**]
+	  Dropping fragments to be received yet will be problematic for
+	  implementations, but dropping fragments received so far ought
+	  to be sufficient.</t>
 
-          <t>Shane: why are we setting TC?</t>
+          <t>[**FIXME**] Shane: why are we setting TC? Mukund: This is
+          so that existing implementations that don't know about DNS
+          fragments will look at TC=1, ignore any unknown options, and
+          move to TCP. They will also drop additional fragments with the
+          same DNS message identifier (the 16-bit one, not the fragment
+          identifier).</t>
 
 	  <t>More than one FRAGMENT option MUST NOT be present in a DNS
 	  reply message fragment datagram. If a DNS implementation
 	  notices multiple FRAGMENT options in a DNS reply message
 	  fragment datagram, it MUST drop all reply datagrams received
 	  for that message's corresponding question tuple (server IP,
-	  port, message ID) without using any data from them.</t>
+	  port, message ID) without using any data from them. [**FIXME**]
+	  Dropping fragments to be received yet will be problematic for
+	  implementations, but dropping fragments received so far ought
+	  to be sufficient.</t>
 	</list></t>
       </section>
     </section>
 
     <section title="The ALLOW-FRAGMENTS EDNS(0) Option">
 
-      <t>ALLOW-FRAGMENTS is an EDNS(0) <xref target="RFC6891" />
-      option that a client uses to inform a server that it supports
-      fragmented responses.</t>
+      <t>ALLOW-FRAGMENTS is an EDNS(0) <xref target="RFC6891" /> option
+      that a client uses to inform a server that it supports fragmented
+      responses. [**FIXME**] Why not simply use the FRAGMENT option here
+      with count=0, identifier=ignored and avoid using another option
+      code?</t>
 
       <section title="Wire Format">
 	<t>TBD.</t>
