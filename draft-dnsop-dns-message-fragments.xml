@@ -174,31 +174,28 @@
       <section title="Motivation">
 	<t>It is not a new topic regarding large DNS packets(>512B) issue
 	<xref target="I-D.ietf-dnsop-respsize"/>, starting from introduction of
-	IPv6, EDNS0 <xref target="SAC016"/>, and DNSSEC deployment <xref target="SAC035"/>.
-	In current production network, DNSSEC with longer Key (ZSK>1024B and KSK>2048B)
-	will coin larger response packets no less than 1500B<xref target="T-DNS"/>.
-	Especially during the KSK rollover process, the response to the query of DNSKEY
-	RRset will be enlarged by containing both the new and old KSK. </t>
+	IPv6, EDNS(0) <xref target="SAC016"/>, and DNSSEC deployment <xref target="SAC035"/>.
+	In current production networks, using DNSSEC with longer DNSKEYs (ZSK>1024B and KSK>2048B)
+	will result in response packets no smaller than 1500B <xref target="T-DNS"/>.
+	Especially during the KSK rollover process, responses to the query of DNSKEY
+	RRset will be enlarged as they contain both the new and old KSK.</t>
 
-	<t>When possible, we should avoid dropped packets, as this means the client
-	must wait for a timeout, which is a high cost. For example, a validator
-	behind a firewall suffers from the timeout with no response, if the firwall
-	drops large EDNS0 packets and IP fragement. It may even cause disaster when
+	<t>When possible, we should avoid dropped packets as this means the client
+	must wait for a timeout, which incurs a high cost. For example, a validator
+	behind a firewall suffers waiting till the timeout with no response, if the firewall
+	drops large EDNS(0) packets and IP fragments. It may even cause disaster when
 	the validator can not recieve response for new trust anchor KSK due to the
-	extreme case of stupid middle box which also drop TCP/53.</t>
-
+	extreme case of bad middle boxes which also drop TCP/53.</t>
 
 	<t>Since UDP requires fewer packets on the wire and less state on servers
-	than TCP, in this memo we still propose UDP as transmission protocol but
-	fragment the larger DNS packets into small DNS packets. We would like the
-	fragments can easily go through the middle box and avoid having to fal
-	back to TCP when possible as well.</t>
+	than TCP, in this memo we propose continuing to use UDP for transmission but
+	fragment the larger DNS packets into smaller DNS packets at the application layer. We would like the
+	fragments to easily go through middle boxes and avoid falling back to TCP.</t>
 
-	<t>Note that this mechanism is not necessary to replace all DNS transaction.
-	It can be triggered by some event or used for special case like KSK rollover
+	<t>[**FIXME**] Note that this mechanism need not necessarily replace all DNS transactions.
+	It can be triggered by some event or used for special cases like KSK rollover
 	process. </t>
-
-	      </section>
+      </section>
     </section>
 
     <section title="DNS Message Fragmentation Method">
