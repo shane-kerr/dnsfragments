@@ -355,6 +355,8 @@
 	  Dropping fragments to be received yet will be problematic for
 	  implementations, but dropping fragments received so far ought
 	  to be sufficient.</t>
+
+	  <t>[**FIXME**] What about TSIG?</t>
 	</list></t>
       </section>
     </section>
