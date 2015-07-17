@@ -347,7 +347,9 @@
       that a client uses to inform a server that it supports fragmented
       responses. [**FIXME**] Why not simply use the FRAGMENT option here
       with count=0, identifier=ignored and avoid using another option
-      code?</t>
+      code? Shane: There are no shortage of options. Plus, if we want
+      to include a maximum fragment size value in the ALLOW-FRAGMENTS
+      then we really need a separate option.</t>
 
       <section title="Wire Format">
 	<t>TBD.</t>
@@ -358,7 +360,8 @@
 	  <t>The Maximum Fragment Size field is represented as an
 	  unsigned 16-bit integer. This is the maximum size used by any
 	  given fragment the server returns. [**FIXME**] This field's
-	  purpose has to be explained.</t>
+	  purpose has to be explained. Shane: discussed in the
+	  discussion section now.</t>
 	</section>
       </section>
       <section title="Presentation Format">
