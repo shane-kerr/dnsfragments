@@ -139,10 +139,11 @@
 	path MTU, a Packet Too Big (PTB) ICMP message will be received
 	by sender without any clue to the sender to reply again with a
 	smaller sized message, due to the stateless feature of
-	DNS. In addition, IP-level fragmentation caused by large DNS response 
-	packet will introduce risk of cache poisoning <xref target="Fragment-Poisonous"/>, 
-	in which the attacker can circumvent some defense mechanism, like 
-	port, IP and query randomization <xref target="RFC5452"/>
+	DNS. In addition, IP-level fragmentation caused by large DNS
+	response packet will introduce risk of cache poisoning
+	<xref target="Fragment-Poisonous"/>, in which the attacker can
+	circumvent some defense mechanisms (like port, IP, and query
+	randomization <xref target="RFC5452"/>).
 	</t>
 
 	<t>As a result, a practical DNS payload size limitation is
@@ -458,26 +459,34 @@
 
     </section>
 
-    <section title="Open issues and discussion">
-    	<t>1. The use of DNS fragements mechnisam</t>
-    	
-    	<t>Is this mechanism design for all DNS transaction or only used by 
-    	some event or used for specially case like key rollover process? If 
-    	the mechanism is design for general DNS transaction, when is it triggered 
-    	and how is it integrated with existing pattern?</t>
-
-	<t>One option is that DNS fragments mechanism works as a backup with 
-	ENDS0, and trigger only when larger packet fails in the middle. It will 
-	be orthogonal with TCP which provide additional context that TC bit 
-	will be used in server side.</t>
-	
-	<t>2. What’s the size of fragments </t> 
-	
-	<t>Generally speaking the number of fragment increase if packets 
-	size is small (512byte, or other empirical value ) which makes the 
-	mechanism less efficient. If the size can changed dynamically according 
-	to negotiation or some detection, it will introduce more cost and round 
-	trip time.</t>
+    <section title="Open Issues and Discussion">
+        <t><list style="numbers">
+    	    <t>The use of DNS fragments mechanism
+	    <vspace blankLines="1"/>
+	    Is this mechanism designed for all DNS transactions, or
+	    only used in some event or special cases like a key
+	    rollover process? If the mechanism is designed for general
+	    DNS transactions, when is it triggered and how is it
+	    integrated with existing patterns?
+	    <vspace blankLines="1"/>
+	    One option is that DNS fragments mechanism works as a
+	    backup with EDNS, and triggered only when a larger packet
+	    fails in the middle. It will be orthogonal with TCP which
+	    provide additional context that TC bit will be used in
+	    server side.
+	    <vspace blankLines="1"/>
+	    </t>
+	    <t>What is the size of fragments?
+	    <vspace blankLines="1"/>
+	    Generally speaking the number of fragment increases if
+	    fragment size is small (512 bytes, or other empirical
+	    value), which makes the mechanism less efficient. If the
+	    size can changed dynamically according to negotiation or
+	    some detection, it will introduce more cost and round trip
+	    time.
+	    <vspace blankLines="1"/>
+	    </t>
+	</list></t>
     </section>
     
     <section title="Security Considerations">
