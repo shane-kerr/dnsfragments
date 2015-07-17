@@ -267,16 +267,9 @@
 	a reply. (See "Open Issues and Discussion" for remaining
 	work.)</t>
 
-	<t>[**FIXME**] The following needs further discussion about the
-	sizes; also an upper limit for each *fragment* has to be the
-	client's UDP payload size as it is the driver and it alone knows
-	the ultimate success/failure of message delivery. So if it sets
-	a maximum payload size of 1200, there's no point in trying
-	1460. Clients that support DNS message fragments (and signal
-	support using the EDNS option) should adapt their UDP payload
-	size discovery algorithm to work with this feature, as the
-	following splits on sizes will assist PMTU discovery.</t>
-	
+	<t>The server MUST NOT exceed the maximum fragment size
+	requested by a client.</t>
+
 	<texttable>
 	  <preamble>The server should use the following sizes for each
 	  fragment in the sequence in IPv4:</preamble>
@@ -500,6 +493,26 @@
 	    when introducing the limit on the number of fragments. We
 	    might also set specific upper limits for number of
 	    fragments.
+	    <vspace blankLines="1"/>
+	    </t>
+	    <t>EDNS buffer sizes vs. maximum fragmentation sizes
+	    <vspace blankLines="1"/>
+	    Mukund: We need further discussion about the sizes; also
+	    an upper limit for each *fragment* has to be the client's
+	    UDP payload size as it is the driver and it alone knows
+	    the ultimate success/failure of message delivery. So if it
+	    sets a maximum payload size of 1200, there's no point in
+	    trying 1460. Clients that support DNS message fragments
+	    (and signal support using the EDNS option) should adapt
+	    their UDP payload size discovery algorithm to work with
+	    this feature, as the following splits on sizes will assist
+	    PMTU discovery.
+	    <vspace blankLines="1"/>
+	    Shane: I think we need to separate the EDNS maximum UDP
+	    payload size from the maximum fragment size. I think that
+	    it is quite likely that (for example) we will want to
+	    restrict each fragment to 1480 bytes, but that the EDNS
+	    buffer size might remain at 4 kibibytes.
 	    <vspace blankLines="1"/>
 	    </t>
 	</list></t>
