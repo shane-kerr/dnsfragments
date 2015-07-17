@@ -9,6 +9,7 @@
 <!ENTITY RFC1035 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1035.xml">
 <!ENTITY RFC1123 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1123.xml">
 <!ENTITY RFC3542 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3542.xml">
+<!ENTITY RFC5452 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5452.xml">
 <!ENTITY RFC5681 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5681.xml">
 <!ENTITY RFC6891 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.6891.xml">
 <!ENTITY I-D.dnsop-cookies SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-dnsop-cookies-02.xml">
@@ -82,11 +83,10 @@
       <organization>Beijing Internet Institute</organization>
       <address>
         <postal>
-          <street>2508 Room, 25th Floor, Tower A, Time Fortune</street>
+          <street>2/F, Building 5, No.58 Jinghai Road, BDA</street>
           <city>Beijing</city>
-          <region></region>
-          <code>100028</code>
-          <country>P. R. China</country>
+          <code>100176</code>
+          <country>CN</country>
         </postal>
         <email>songlinjian@gmail.com</email>
         <uri>http://www.biigroup.com/</uri>
@@ -139,9 +139,10 @@
 	path MTU, a Packet Too Big (PTB) ICMP message will be received
 	by sender without any clue to the sender to reply again with a
 	smaller sized message, due to the stateless feature of
-	DNS. [**FIXME**] So an initiator asks for large DNS response
-	packet has risk of no response which poison the DNS transaction
-	<xref target="Fragment-Poisonous"/>.
+	DNS. In addition, IP-level fragmentation caused by large DNS response 
+	packet will introduce risk of cache poisoning <xref target="Fragment-Poisonous"/>, 
+	in which the attacker can circumvent some defense mechanism, like 
+	port, IP and query randomization <xref target="RFC5452"/>
 	</t>
 
 	<t>As a result, a practical DNS payload size limitation is
@@ -199,9 +200,6 @@
 	fragments to easily go through middle boxes and avoid falling
 	back to TCP.</t>
 
-	<t>[**FIXME**] Note that this mechanism need not necessarily
-	replace all DNS transactions.  It can be triggered by some event
-	or used for special cases like KSK rollover process.</t>
       </section>
     </section>
 
@@ -460,6 +458,28 @@
 
     </section>
 
+    <section title="Open issues and discussion">
+    	<t>1. The use of DNS fragements mechnisam</t>
+    	
+    	<t>Is this mechanism design for all DNS transaction or only used by 
+    	some event or used for specially case like key rollover process? If 
+    	the mechanism is design for general DNS transaction, when is it triggered 
+    	and how is it integrated with existing pattern?</t>
+
+	<t>One option is that DNS fragments mechanism works as a backup with 
+	ENDS0, and trigger only when larger packet fails in the middle. It will 
+	be orthogonal with TCP which provide additional context that TC bit 
+	will be used in server side.</t>
+	
+	<t>2. What’s the size of fragments <t/> 
+	
+	<t>Generally speaking the number of fragment increase if packets 
+	size is small (512byte, or other empirical value ) which makes the 
+	mechanism less efficient. If the size can changed dynamically according 
+	to negotiation or some detection, it will introduce more cost and round 
+	trip time.</t>
+    </section>
+    
     <section title="Security Considerations">
       <t>To avoid DNS amplification or reflection attacks,
       DNS cookies <xref target="I-D.ietf-dnsop-cookies"/> must be used.</t>
@@ -481,7 +501,7 @@
   <back>
 
     <references title="References">
-      &RFC1035;&RFC1123; &RFC5681; &RFC6891;&RFC3542;
+      &RFC1035;&RFC1123; &RFC5681; &RFC6891;&RFC3542;&RFC5452;
       &I-D.dnsop-cookies;&I-D.dnsop-respsize;
 
     <reference anchor="Fragment-Poisonous">
