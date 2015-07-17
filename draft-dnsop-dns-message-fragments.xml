@@ -534,6 +534,12 @@
 	    Probably the best behavior here is to truncate.
 	    <vspace blankLines="1"/>
 	    </t>
+	    <t>DNSSEC checks
+	    <vspace blankLines="1"/>
+	    DNSSEC checks should be done on the final reassembled
+	    packet. This needs to be documented.
+	    <vspace blankLines="1"/>
+	    </t>
 	</list></t>
     </section>
 
