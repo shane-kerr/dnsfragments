@@ -540,6 +540,12 @@
 	    packet. This needs to be documented.
 	    <vspace blankLines="1"/>
 	    </t>
+	    <t>Name compression
+	    <vspace blankLines="1"/>
+	    Name compression should be done on the each fragment
+	    separately. This needs to be documented.
+	    <vspace blankLines="1"/>
+	    </t>
 	</list></t>
     </section>
     
