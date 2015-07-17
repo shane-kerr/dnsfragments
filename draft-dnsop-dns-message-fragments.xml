@@ -337,8 +337,6 @@
 	  Dropping fragments to be received yet will be problematic for
 	  implementations, but dropping fragments received so far ought
 	  to be sufficient.</t>
-
-	  <t>[**FIXME**] What about TSIG?</t>
 	</list></t>
       </section>
     </section>
@@ -508,6 +506,15 @@
 	    it is quite likely that (for example) we will want to
 	    restrict each fragment to 1480 bytes, but that the EDNS
 	    buffer size might remain at 4 kibibytes.
+	    <vspace blankLines="1"/>
+	    </t>
+	    <t>TSIG should be addressed
+	    <vspace blankLines="1"/>
+	    We need to document how to handle TSIG, even though this
+	    is not likely to be a real-world issue. Probably each
+	    fragment should be TSIG signed, as this makes it harder
+	    for an attacker to inject bogus packets that a client will
+	    have to process.
 	    <vspace blankLines="1"/>
 	    </t>
 	</list></t>
