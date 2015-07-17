@@ -223,9 +223,9 @@
 	reassemble fragments into a DNS message of any size, up to the
 	maximum of 64KiB.</t>
 
-	<t>[**FIXME**] The client MAY save information about what sizes
-	of packets have been received from a given server. If saved,
-	this information MUST have a limited duration.</t>
+	<t>The client MAY save information about what sizes of packets
+	have been received from a given server. If saved, this
+	information MUST have a limited duration.</t>
 
 	<t>Any DNSSEC validation is performed on the reassembled DNS
 	message.</t>
