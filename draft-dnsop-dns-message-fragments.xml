@@ -465,13 +465,13 @@
     	some event or used for specially case like key rollover process? If 
     	the mechanism is design for general DNS transaction, when is it triggered 
     	and how is it integrated with existing pattern?</t>
-
+
 	<t>One option is that DNS fragments mechanism works as a backup with 
 	ENDS0, and trigger only when larger packet fails in the middle. It will 
 	be orthogonal with TCP which provide additional context that TC bit 
 	will be used in server side.</t>
 	
-	<t>2. What’s the size of fragments <t/> 
+	<t>2. What’s the size of fragments </t> 
 	
 	<t>Generally speaking the number of fragment increase if packets 
 	size is small (512byte, or other empirical value ) which makes the 
