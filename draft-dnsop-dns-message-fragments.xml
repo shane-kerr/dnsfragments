@@ -138,12 +138,12 @@
 	fragmented by the sender only. If a packet's size exceeds the
 	path MTU, a Packet Too Big (PTB) ICMP message will be received
 	by sender without any clue to the sender to reply again with a
-	smaller sized message, due to the stateless feature of DNS. In
-	addition, IP-level fragmentation caused by large DNS response
-	packets introduces the risk of cache poisoning <xref
-	target="Fragment-Poisonous"/> in which the attacker can
-	circumvent defense mechanisms like port, IP and query ID
-	randomization. <xref target="RFC5452"/>
+	smaller sized message, due to the stateless feature of
+	DNS. In addition, IP-level fragmentation caused by large DNS
+	response packet will introduce risk of cache poisoning
+	<xref target="Fragment-Poisonous"/>, in which the attacker can
+	circumvent some defense mechanisms (like port, IP, and query
+	randomization <xref target="RFC5452"/>).
 	</t>
 
 	<t>As a result, a practical DNS payload size limitation is
@@ -459,38 +459,34 @@
 
     </section>
 
-    <section title="Open issues and discussion">
-      <section title="The use of DNS fragments mechanism">
-    	<t>Is this mechanism designed for all DNS transactions or only
-    	used by some event, or used for specially case like key rollover
-    	process? If the mechanism is designed for general DNS
-    	transactions, when is it triggered and how is it integrated with
-    	existing pattern?</t>
-
-	<t>One option is that DNS fragments mechanism works as a backup
-	with ENDS0, and triggers only when larger packet fails in the
-	middle. It will be orthogonal with TCP which provide additional
-	context that TC bit will be used in server side.</t>
-      </section>
-
-      <section title="Size of fragments">
-	<t>Generally speaking the number of fragments increases if
-	datagram size is small (e.g., 512 bytes) which makes the
-	mechanism less efficient. If the size is to be changed
-	dynamically by negotiation, it will introduce more costs in the
-	way of round trips. We have proposed a method to use increasing
-	datagram sizes for subsequent fragments, so that the client (the
-	only side that knows if a DNS request was responded to
-	successfully) can use what datagram sizes arrive as a
-	rudimentary or blunt path MTU discovery. The UDP payload size in
-	the OPT RR is the upper limit for a fragment's size.</t>
-      </section>
-
-      <section title="Separate options">
-	<t>Are separate ALLOW-FRAGMENTS and FRAGMENT options required,
-	or can FRAGMENT be overloaded with values set to 0 and QR=0 to
-	replace ALLOW-FRAGMENTS?</t>
-      </section>
+    <section title="Open Issues and Discussion">
+        <t><list style="numbers">
+    	    <t>The use of DNS fragments mechanism
+	    <vspace blankLines="1"/>
+	    Is this mechanism designed for all DNS transactions, or
+	    only used in some event or special cases like a key
+	    rollover process? If the mechanism is designed for general
+	    DNS transactions, when is it triggered and how is it
+	    integrated with existing patterns?
+	    <vspace blankLines="1"/>
+	    One option is that DNS fragments mechanism works as a
+	    backup with EDNS, and triggered only when a larger packet
+	    fails in the middle. It will be orthogonal with TCP which
+	    provide additional context that TC bit will be used in
+	    server side.
+	    <vspace blankLines="1"/>
+	    </t>
+	    <t>What is the size of fragments?
+	    <vspace blankLines="1"/>
+	    Generally speaking the number of fragment increases if
+	    fragment size is small (512 bytes, or other empirical
+	    value), which makes the mechanism less efficient. If the
+	    size can changed dynamically according to negotiation or
+	    some detection, it will introduce more cost and round trip
+	    time.
+	    <vspace blankLines="1"/>
+	    </t>
+	</list></t>
     </section>
 
     <section title="Security Considerations">
