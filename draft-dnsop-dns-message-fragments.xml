@@ -246,16 +246,15 @@
 	client, then it should fragment the message into multiple UDP
 	datagrams.</t>
 
-	<t>[**FIXME**] The TC=1 logic, and how an existing
-	implementation that does not know about DNS messages fragments
-	handles these datagrams, has to be better explained here.</t>
-	
 	<t>Each fragment contains an identical DNS header with TC=1,
-	possibly varying only in the section counts. [**FIXME**] As many
-	RR are included in each fragment as are possible without going
-	over the desired size of the fragment. An EDNS option is added
-	to every fragment, that includes both the fragment identifier
-	and the total number of fragments.</t>
+	possibly varying only in the section counts. Setting the TC
+	flag in this way insures that clients which do not support DNS
+	fragments can fallback to TCP transparently.</t>
+	
+	<t>As many RR are included in each fragment as are possible
+	without going over the desired size of the fragment. An EDNS
+	option is added to every fragment, that includes both the
+	fragment identifier and the total number of fragments.</t>
 
 	<t>The server needs to know how many total fragments there
 	are to insert into each fragment. A simple approach would be
