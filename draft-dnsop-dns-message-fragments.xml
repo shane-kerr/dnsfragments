@@ -487,6 +487,15 @@
 	    time.
 	    <vspace blankLines="1"/>
 	    </t>
+	    <t>What happens if a client that does not support DNS
+	    fragments receives an out-of-order or partial
+	    fragment?</t>
+	    <vspace blankLines="1"/>
+	    We need to consider what happens when a client that does
+	    not support DNS fragments gets a partial response,
+	    possibly even out of order.
+	    <vspace blankLines="1"/>
+	    </t>
 	</list></t>
     </section>
 
