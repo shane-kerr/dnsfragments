@@ -229,11 +229,6 @@
 
 	<t>Any DNSSEC validation is performed on the reassembled DNS
 	message.</t>
-
-	<t>[**FIXME**] Shane: Do we want discussion of resolver behavior
-	in particular? My thinking is that this belongs in another
-	section, if at all. Mukund: I feel it needs some discussion, at
-	least to make things clear to an implementor.</t>
       </section>
 
       <section title="Server Behavior">
@@ -461,6 +456,12 @@
 
     <section title="Open Issues and Discussion">
         <t><list style="numbers">
+	    <t>Resolver behavior
+	    <vspace blankLines="1"/>
+	    We need some more discussion of resolver behavior in
+	    general, at least to the point of making things clear to
+	    an implementor.
+	    </t>
     	    <t>The use of DNS fragments mechanism
 	    <vspace blankLines="1"/>
 	    Is this mechanism designed for all DNS transactions, or
