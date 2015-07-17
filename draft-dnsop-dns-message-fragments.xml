@@ -238,7 +238,8 @@
         fragmentation. The server MUST check that DNS cookies are
         supported. [**FIXME**] Implementation of the first request case,
         where no existing established cookie is available needs
-        discussion; we want to avoid additional round-trips here.</t>
+        discussion; we want to avoid additional round-trips here.
+	Shane: don't cookies already handle this case?</t>
 
 	<t>The server prepares the response DNS message normally. If the
 	message exceeds the maximum UDP payload size specified by the
