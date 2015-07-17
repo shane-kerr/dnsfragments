@@ -475,7 +475,7 @@
 	    </t>
 	    <t>What happens if a client that does not support DNS
 	    fragments receives an out-of-order or partial
-	    fragment?</t>
+	    fragment?
 	    <vspace blankLines="1"/>
 	    We need to consider what happens when a client that does
 	    not support DNS fragments gets a partial response,
@@ -515,6 +515,15 @@
 	    fragment should be TSIG signed, as this makes it harder
 	    for an attacker to inject bogus packets that a client will
 	    have to process.
+	    <vspace blankLines="1"/>
+	    </t>
+	    <t>RR splitting should be addressed
+	    <vspace blankLines="1"/>
+	    We need to document whether or not RR can be split.
+	    Probably it makes sense not to allow this, although this
+	    will reduce the effectiveness of the fragmentation, as the
+	    units that can be packed into each fragment will be
+	    bigger.
 	    <vspace blankLines="1"/>
 	    </t>
 	</list></t>
