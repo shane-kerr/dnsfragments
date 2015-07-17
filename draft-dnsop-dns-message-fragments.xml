@@ -285,7 +285,9 @@
 	  get through. 1460 is the 1500 octet Ethernet packet size,
 	  minus the IP header overhead and enough space to support
 	  tunneled traffic. 1480 is the 1500 octet Ethernet packet
-	  size, minus the IP header overhead. [**FIXME**] Why not add 1240 here?
+	  size, minus the IP header overhead. [**FIXME**] Why not add
+	  1240 here? Shane answers: 1280 is not any kind of limit in
+	  IPv4, as far as I know.
 	  </postamble>
 	</texttable>
 
