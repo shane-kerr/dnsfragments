@@ -328,13 +328,6 @@
 	  implementations, but dropping fragments received so far ought
 	  to be sufficient.</t>
 
-          <t>[**FIXME**] Shane: why are we setting TC? Mukund: This is
-          so that existing implementations that don't know about DNS
-          fragments will look at TC=1, ignore any unknown options, and
-          move to TCP. They will also drop additional fragments with the
-          same DNS message identifier (the 16-bit one, not the fragment
-          identifier).</t>
-
 	  <t>More than one FRAGMENT option MUST NOT be present in a DNS
 	  reply message fragment datagram. If a DNS implementation
 	  notices multiple FRAGMENT options in a DNS reply message
