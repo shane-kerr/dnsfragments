@@ -526,6 +526,14 @@
 	    bigger.
 	    <vspace blankLines="1"/>
 	    </t>
+	    <t>We need to document that some messages may not be
+	    possible to split.
+	    <vspace blankLines="1"/>
+	    Some messages may be too large to split. A trivial example
+	    is a TXT record that is larger than the buffer size.
+	    Probably the best behavior here is to truncate.
+	    <vspace blankLines="1"/>
+	    </t>
 	</list></t>
     </section>
     
