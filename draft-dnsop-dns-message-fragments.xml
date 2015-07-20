@@ -107,7 +107,7 @@
       multiple UDP datagrams by fragmenting them at the application
       layer. The objective is to allow authoriative servers to
       successfully reply to DNS queries via UDP using multiple smaller
-      datagrams, when larger datagrams don't pass through the network
+      datagrams, where larger datagrams may not pass through the network
       successfully.</t>
     </abstract>
 
