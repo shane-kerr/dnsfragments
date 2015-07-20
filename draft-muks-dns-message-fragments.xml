@@ -43,7 +43,7 @@
 <!-- end of list of popular I-D processing instructions -->
 <?rfc comments="no" ?>
 <?rfc inline="yes" ?>
-<rfc category="exp" docName="draft-dnsop-dns-message-fragments-00" ipr="trust200902">
+<rfc category="exp" docName="draft-muks-dns-message-fragments-00" ipr="trust200902">
 
   <front>
 
@@ -634,7 +634,7 @@
         <list style="symbols">
 
           <t>
-	  draft-dnsop-dns-message-fragments-00
+	  draft-muks-dns-message-fragments-00
           <vspace/>
           Initial draft.
           </t>
