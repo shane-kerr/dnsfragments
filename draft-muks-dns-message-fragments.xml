@@ -579,7 +579,7 @@
 
   <back>
 
-    <references title="References">
+    <references title="Normative references">
       <?rfc include="reference.RFC.1035.xml"?>
       <?rfc include="reference.RFC.1123.xml"?>
       <?rfc include="reference.RFC.2119.xml"?>
@@ -588,9 +588,12 @@
       <?rfc include="reference.RFC.5681.xml"?>
       <?rfc include="reference.RFC.6891.xml"?>
       <?rfc include="reference.I-D.ietf-dnsop-cookies.xml"?>
+    </references>
+
+    <references title="Informative references">
       <?rfc include="reference.I-D.ietf-dnsop-respsize.xml"?>
 
-    <reference anchor="Fragment-Poisonous">
+      <reference anchor="Fragment-Poisonous">
 	            <front>
 	                <title>Fragmentation Considered Poisonous</title>
 			<author fullname="Herzberg, A."  initials="A." surname="Herzberg"></author>
