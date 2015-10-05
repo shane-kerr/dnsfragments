@@ -159,6 +159,11 @@
 	amplification and reflection attacks, DNS cookies <xref
 	target="I-D.ietf-dnsop-cookies"/> is a mandatory requirement
 	when using DNS message fragments.</t>
+
+	<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
+	NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
+	"OPTIONAL" in this document are to be interpreted as described
+	in <xref target="RFC2119" />.</t>
       </section>
 
       <section title="Motivation">
@@ -577,6 +582,7 @@
     <references title="References">
       <?rfc include="reference.RFC.1035.xml"?>
       <?rfc include="reference.RFC.1123.xml"?>
+      <?rfc include="reference.RFC.2119.xml"?>
       <?rfc include="reference.RFC.3542.xml"?>
       <?rfc include="reference.RFC.5452.xml"?>
       <?rfc include="reference.RFC.5681.xml"?>
