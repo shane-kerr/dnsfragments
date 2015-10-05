@@ -581,7 +581,6 @@
 
     <references title="Normative references">
       <?rfc include="reference.RFC.1035.xml"?>
-      <?rfc include="reference.RFC.1123.xml"?>
       <?rfc include="reference.RFC.2119.xml"?>
       <?rfc include="reference.RFC.3542.xml"?>
       <?rfc include="reference.RFC.5452.xml"?>
