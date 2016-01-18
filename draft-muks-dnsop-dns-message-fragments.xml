@@ -30,7 +30,7 @@
 <!-- end of list of popular I-D processing instructions -->
 <?rfc comments="no" ?>
 <?rfc inline="yes" ?>
-<rfc category="exp" docName="draft-muks-dnsop-dns-message-fragments-00" ipr="trust200902">
+<rfc category="exp" docName="draft-muks-dnsop-dns-message-fragments-01" ipr="trust200902">
 
   <front>
 
@@ -219,6 +219,9 @@
 	have been received from a given server. If saved, this
 	information MUST have a limited duration.</t>
 
+    <t>If TSIG <xref target="RFC2845"/> is used, then the signature
+    must be checked on each fragment separately.</t>
+
 	<t>Any DNSSEC validation is performed on the reassembled DNS
 	message.</t>
       </section>
@@ -246,7 +249,11 @@
 	<t>As many RR are included in each fragment as are possible
 	without going over the desired size of the fragment. An EDNS
 	option is added to every fragment, that includes both the
-	fragment identifier and the total number of fragments.</t>
+	fragment identifier and the total number of fragments. Names are
+    compressed in each fragment separately.</t>
+
+    <t>An RRSET may be split across multiple fragments. RRSIG may be
+    sent in a separate fragment from the RRSET that it refers to.</t>
 
 	<t>The server needs to know how many total fragments there
 	are to insert into each fragment. A simple approach would be
@@ -256,53 +263,32 @@
 	possible.</t>
 
 	<t>The server MUST limit the number of fragments that it uses in
-	a reply. (See "Open Issues and Discussion" for remaining
-	work.)</t>
+	a reply. Too many packets sent simultaneously can cause network
+    congestion or packet loss, either of which will degrade the
+    overall network performance. (See "Open Issues and Discussion" for
+    remaining work.)</t>
 
-	<t>The server MUST NOT exceed the maximum fragment size
-	requested by a client.</t>
+    <t>The server should try to minimize the total number of packets
+    sent, however since this is similar to the bin packing problem,
+    which is complexity NP-hard, the server does not have to garantee
+    this. In all cases, the server MUST NOT exceed the maximum
+    fragment size requested by a client.</t>
 
-	<texttable>
-	  <preamble>The server should use the following sizes for each
-	  fragment in the sequence in IPv4:</preamble>
-	  <ttcol>Fragment ID</ttcol>
-	  <ttcol>Size</ttcol>
-	  <c>1</c><c>min(512, client_specified_max)</c>
-	  <c>2</c><c>min(1460, client_specified_max)</c>
-	  <c>3</c><c>min(1480, client_specified_max)</c>
-	  <c>N</c><c>min(1480, client_specified_max)</c>
-	  <postamble>The rationale is that the first packet will always get
-	  through, since if a 512 octet packet doesn't work, DNS cannot
-	  function. We then increase to sizes that are likely to
-	  get through. 1460 is the 1500 octet Ethernet packet size,
-	  minus the IP header overhead and enough space to support
-	  tunneled traffic. 1480 is the 1500 octet Ethernet packet
-	  size, minus the IP header overhead. [**FIXME**] Why not add
-	  1240 here? Shane answers: 1280 is not any kind of limit in
-	  IPv4, as far as I know.
-	  </postamble>
-	</texttable>
+    <t>If TSIG <xref target="RFC2845"/> is used, then the signature
+    must be added to each fragment separately.</t>
 
-	<texttable>
-	  <preamble>The server should use the following sizes for each
-	  packet in the sequence in IPv6:</preamble>
-	  <ttcol>Fragment ID</ttcol>
-	  <ttcol>Size</ttcol>
-	  <c>1</c><c>min(1240, client_specified_max)</c>
-	  <c>2</c><c>min(1420, client_specified_max)</c>
-	  <c>3</c><c>min(1460, client_specified_max)</c>
-	  <c>N</c><c>min(1460, client_specified_max)</c>
-	  <postamble>Like with IPv4, the idea is that the first packet
-	  will always get through. In this case we use the
-	  IPv6-mandated 1280 octets, minus the IP header overhead.
-	  We then increase to 1420, which is the 1500 octet Ethernet
-	  packet size, minus the IP header overhead and enough space
-	  to support tunneled traffic. 1460 is the 1500 octet Ethernet
-	  packet size, minus the IP header overhead.
-	  </postamble>
-	</texttable>
-      </section>
-      <section title="Other Notes"><t>
+    <t>If a message cannot be fragmented successfully or the server
+    does not wish to fragment a message, then the FRAGMENT EDNS(0)
+    Option is not included in the reply, and it is truncated as a
+    normal, non-fragmented message. (There are many reasons a server
+    may not wish to fragment a reply, for example if it would result
+    in too many fragments. Also, since fragmentation occurs on an RR
+    boundary, any RR that would cause a fragment to exceed the maximum
+    message size cannot be fragmented. A large TXT record can cause
+    this behavior, for example.)</t>
+
+    </section>
+    <section title="Other Notes"><t>
 	<list style="symbols">
 	  <t>The FRAGMENT option MUST NOT be present in DNS query
 	  messages, i.e., when QR=0. If a DNS implementation notices the
@@ -337,11 +323,7 @@
 
       <t>ALLOW-FRAGMENTS is an EDNS(0) <xref target="RFC6891" /> option
       that a client uses to inform a server that it supports fragmented
-      responses. [**FIXME**] Why not simply use the FRAGMENT option here
-      with count=0, identifier=ignored and avoid using another option
-      code? Shane: There are no shortage of options. Plus, if we want
-      to include a maximum fragment size value in the ALLOW-FRAGMENTS
-      then we really need a separate option.</t>
+      responses.</t>
 
       <section title="Wire Format">
 	<t>TBD.</t>
@@ -351,9 +333,7 @@
 	<section title="Maximum Fragment Size">
 	  <t>The Maximum Fragment Size field is represented as an
 	  unsigned 16-bit integer. This is the maximum size used by any
-	  given fragment the server returns. [**FIXME**] This field's
-	  purpose has to be explained. Shane: discussed in the
-	  discussion section now.</t>
+	  given fragment the server returns.</t>
 	</section>
       </section>
       <section title="Presentation Format">
@@ -443,21 +423,6 @@
 	    general, at least to the point of making things clear to
 	    an implementor.
 	    </t>
-    	    <t>The use of DNS fragments mechanism
-	    <vspace blankLines="1"/>
-	    Is this mechanism designed for all DNS transactions, or
-	    only used in some event or special cases like a key
-	    rollover process? If the mechanism is designed for general
-	    DNS transactions, when is it triggered and how is it
-	    integrated with existing patterns?
-	    <vspace blankLines="1"/>
-	    One option is that DNS fragments mechanism works as a
-	    backup with EDNS, and triggered only when a larger packet
-	    fails in the middle. It will be orthogonal with TCP which
-	    provide additional context that TC bit will be used in
-	    server side.
-	    <vspace blankLines="1"/>
-	    </t>
 	    <t>What is the size of fragments?
 	    <vspace blankLines="1"/>
 	    Generally speaking the number of fragment increases if
@@ -468,88 +433,16 @@
 	    time.
 	    <vspace blankLines="1"/>
 	    </t>
-	    <t>What happens if a client that does not support DNS
-	    fragments receives an out-of-order or partial
-	    fragment?
-	    <vspace blankLines="1"/>
-	    We need to consider what happens when a client that does
-	    not support DNS fragments gets a partial response,
-	    possibly even out of order.
-	    <vspace blankLines="1"/>
-	    </t>
-	    <t>We should explain risk of congestion, packet loss, etc.
-	    when introducing the limit on the number of fragments. We
-	    might also set specific upper limits for number of
+        <t>We might set specific upper limits for number of
 	    fragments.
-	    <vspace blankLines="1"/>
-	    </t>
-	    <t>EDNS buffer sizes vs. maximum fragmentation sizes
-	    <vspace blankLines="1"/>
-	    Mukund: We need further discussion about the sizes; also
-	    an upper limit for each *fragment* has to be the client's
-	    UDP payload size as it is the driver and it alone knows
-	    the ultimate success/failure of message delivery. So if it
-	    sets a maximum payload size of 1200, there's no point in
-	    trying 1460. Clients that support DNS message fragments
-	    (and signal support using the EDNS option) should adapt
-	    their UDP payload size discovery algorithm to work with
-	    this feature, as the following splits on sizes will assist
-	    PMTU discovery.
-	    <vspace blankLines="1"/>
-	    Shane: I think we need to separate the EDNS maximum UDP
-	    payload size from the maximum fragment size. I think that
-	    it is quite likely that (for example) we will want to
-	    restrict each fragment to 1480 bytes, but that the EDNS
-	    buffer size might remain at 4 kibibytes.
-	    <vspace blankLines="1"/>
-	    </t>
-	    <t>TSIG should be addressed
-	    <vspace blankLines="1"/>
-	    We need to document how to handle TSIG, even though this
-	    is not likely to be a real-world issue. Probably each
-	    fragment should be TSIG signed, as this makes it harder
-	    for an attacker to inject bogus packets that a client will
-	    have to process.
-	    <vspace blankLines="1"/>
-	    </t>
-	    <t>RR splitting should be addressed
-	    <vspace blankLines="1"/>
-	    We need to document whether or not RR can be split.
-	    Probably it makes sense not to allow this, although this
-	    will reduce the effectiveness of the fragmentation, as the
-	    units that can be packed into each fragment will be
-	    bigger.
-	    <vspace blankLines="1"/>
-	    </t>
-	    <t>We need to document that some messages may not be
-	    possible to split.
-	    <vspace blankLines="1"/>
-	    Some messages may be too large to split. A trivial example
-	    is a TXT record that is larger than the buffer size.
-	    Probably the best behavior here is to truncate.
-	    <vspace blankLines="1"/>
-	    </t>
-	    <t>DNSSEC checks
-	    <vspace blankLines="1"/>
-	    DNSSEC checks should be done on the final reassembled
-	    packet. This needs to be documented.
-	    <vspace blankLines="1"/>
-	    </t>
-	    <t>Name compression
-	    <vspace blankLines="1"/>
-	    Name compression should be done on the each fragment
-	    separately. This needs to be documented.
 	    <vspace blankLines="1"/>
 	    </t>
 	    <t>OPT-RR
 	    <vspace blankLines="1"/>
 	    Some OPT-RR seem to be oriented at the entire message,
 	    others make more sense per packet. This needs to be
-	    sorted out. Also we need to investigate the edge case
-	    where fragments have conflicting options (Mukund thinks
-	    that we can copy the approach in the EDNS specification
-	    and use the same rules about conflicting OPT-RR that it
-	    uses.)
+	    sorted out. It looks like only cookies need to be included per
+        fragment.
 	    <vspace blankLines="1"/>
 	    </t>
 	</list></t>
@@ -582,6 +475,7 @@
     <references title="Normative references">
       <?rfc include="reference.RFC.1035.xml"?>
       <?rfc include="reference.RFC.2119.xml"?>
+      <?rfc include="reference.RFC.2845.xml"?>
       <?rfc include="reference.RFC.3542.xml"?>
       <?rfc include="reference.RFC.5452.xml"?>
       <?rfc include="reference.RFC.5681.xml"?>
@@ -638,6 +532,25 @@
 	  draft-muks-dns-message-fragments-00
           <vspace/>
           Initial draft.
+          </t>
+
+          <t>
+	  draft-muks-dnsop-dns-message-fragments-00
+          <vspace/>
+	      <list style="symbols">
+          <t>Renamed to include dnsop in the name.</t>
+          <t>Removed the increasing packet size approach. All packets
+          are now limited to the same size in a given fragmented
+          message.</t>
+          <t>Added a brief note about network congestion and packet
+          loss if sending too many fragments at once.</t>
+          <t>TSIG behavior documented.</t>
+          <t>Documented that RRSET may be split, and RRSIG sent
+          separately from RRSET.</t>
+          <t>Documented behavior if a packet cannot be split, and gave
+          some text about how this can happen.</t>
+          <t>Clarified name compression is per fragment.</t>
+          </list>
           </t>
 
         </list>
