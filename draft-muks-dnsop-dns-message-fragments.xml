@@ -1,20 +1,7 @@
 <?xml version="1.0"?>
 <!-- This template is for creating an Internet Draft using xml2rfc,
      which is available here: http://xml.resource.org. -->
-<!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
-<!-- One method to get references from the online citation libraries.
-     There has to be one entity for each item to be referenced.
-     An alternate method (rfc include) is described in the references. -->
-
-<!ENTITY RFC1035 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1035.xml">
-<!ENTITY RFC1123 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1123.xml">
-<!ENTITY RFC3542 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.3542.xml">
-<!ENTITY RFC5452 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5452.xml">
-<!ENTITY RFC5681 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.5681.xml">
-<!ENTITY RFC6891 SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.6891.xml">
-<!ENTITY I-D.dnsop-cookies SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-dnsop-cookies-04.xml">
-<!ENTITY I-D.dnsop-respsize SYSTEM "http://xml2rfc.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-dnsop-respsize-15.xml">
-]>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd">
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 <!-- used by XSLT processors -->
 <!-- For a complete list and description of processing instructions (PIs),
@@ -43,7 +30,7 @@
 <!-- end of list of popular I-D processing instructions -->
 <?rfc comments="no" ?>
 <?rfc inline="yes" ?>
-<rfc category="exp" docName="draft-muks-dns-message-fragments-00" ipr="trust200902">
+<rfc category="exp" docName="draft-muks-dnsop-dns-message-fragments-00" ipr="trust200902">
 
   <front>
 
@@ -59,7 +46,7 @@
           <region>CA</region>
           <country>US</country>
         </postal>
-        <email>muks@isc.org</email>
+        <email>muks@mukund.org</email>
         <uri>http://www.isc.org/</uri>
       </address>
     </author>
@@ -172,6 +159,11 @@
 	amplification and reflection attacks, DNS cookies <xref
 	target="I-D.ietf-dnsop-cookies"/> is a mandatory requirement
 	when using DNS message fragments.</t>
+
+	<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
+	NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
+	"OPTIONAL" in this document are to be interpreted as described
+	in <xref target="RFC2119" />.</t>
       </section>
 
       <section title="Motivation">
@@ -587,11 +579,20 @@
 
   <back>
 
-    <references title="References">
-      &RFC1035;&RFC1123; &RFC5681; &RFC6891;&RFC3542;&RFC5452;
-      &I-D.dnsop-cookies;&I-D.dnsop-respsize;
+    <references title="Normative references">
+      <?rfc include="reference.RFC.1035.xml"?>
+      <?rfc include="reference.RFC.2119.xml"?>
+      <?rfc include="reference.RFC.3542.xml"?>
+      <?rfc include="reference.RFC.5452.xml"?>
+      <?rfc include="reference.RFC.5681.xml"?>
+      <?rfc include="reference.RFC.6891.xml"?>
+      <?rfc include="reference.I-D.ietf-dnsop-cookies.xml"?>
+    </references>
 
-    <reference anchor="Fragment-Poisonous">
+    <references title="Informative references">
+      <?rfc include="reference.I-D.ietf-dnsop-respsize.xml"?>
+
+      <reference anchor="Fragment-Poisonous">
 	            <front>
 	                <title>Fragmentation Considered Poisonous</title>
 			<author fullname="Herzberg, A."  initials="A." surname="Herzberg"></author>

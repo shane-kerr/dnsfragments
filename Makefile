@@ -1,7 +1,7 @@
-all: draft-muks-dns-message-fragments.txt draft-muks-dns-message-fragments.html
+all: draft-muks-dnsop-dns-message-fragments.txt draft-muks-dnsop-dns-message-fragments.html
 
-draft-muks-dns-message-fragments.txt: draft-muks-dns-message-fragments.xml
+draft-muks-dnsop-dns-message-fragments.txt: draft-muks-dnsop-dns-message-fragments.xml
 	xml2rfc $<
 
-draft-muks-dns-message-fragments.html: draft-muks-dns-message-fragments.xml
+draft-muks-dnsop-dns-message-fragments.html: draft-muks-dnsop-dns-message-fragments.xml
 	xml2rfc --html $<
